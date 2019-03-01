@@ -22,6 +22,15 @@ func ConnectToRedis() *redis.Client {
 	return client
 }
 
+func FlushRedis(client *redis.Client) error {
+	_, err := client.FlushDB().Result()
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
 func ClearLock(client *redis.Client, lockname string) bool {
 	lockname = "lock:" + lockname
 	val, _ := client.Del(lockname).Result()

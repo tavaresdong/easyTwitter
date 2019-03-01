@@ -48,9 +48,37 @@ func CreateStatus(client *redis.Client, uid string, message string) (int64, erro
 		"uid": uid,
 		"login": login,
 	}
-	pipe.HMSet(fmt.Sprintf("status:%d", id), data)
-	pipe.HIncrBy(fmt.Sprintf("user:%s", uid), "posts", 1)
-	pipe.Exec()
 
+	pipe.ZAdd(fmt.Sprintf("profile:%s", uid), redis.Z{
+		Score: float64(time.Now().UnixNano() / int64(time.Millisecond)),
+		Member: id,
+	})
+
+	status := pipe.HMSet(fmt.Sprintf("status:%d", id), data)
+	pipe.HIncrBy(fmt.Sprintf("user:%s", uid), "posts", 1)
+	_, err = pipe.Exec()
+	if err == nil {
+		fmt.Println(status.Val())
+	}
 	return id, nil
+}
+
+func GetStatusMessage(client *redis.Client,
+	uid string, timeline string, page int64, count int64)([]map[string]string, error) {
+	statuses, err := client.ZRevRange(fmt.Sprintf("%s%s", timeline, uid),
+		(page - 1) * count, page * count - 1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]map[string]string, 0)
+	for _, id := range statuses {
+		d, err := client.HGetAll(fmt.Sprintf("status:%s", id)).Result()
+		if err != nil {
+			continue
+		}
+		data = append(data, d)
+	}
+
+	return data, nil
 }
