@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/satori/go.uuid"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -81,7 +80,7 @@ func ReleaseLock(client *redis.Client, lockname string, identifier string) error
 		err := client.Watch(func(tx *redis.Tx) error {
 			id, err := tx.Get(key).Result()
 			if err != nil || strings.Compare(id, identifier) != 0 {
-				return errors.New("Identifier mismatch: [" + id + "] [" + identifier + "] " + strconv.Itoa(strings.Compare(id, identifier)))
+				return errors.New("Identifier mismatch")
 				tx.Unwatch(key)
 			}
 
