@@ -23,3 +23,19 @@ func TestUserCrud(t *testing.T) {
 	err := DeleteUser(client, userLogin)
 	assert.Nil(t, err)
 }
+
+func TestPostUserStatus(t *testing.T) {
+	client := ConnectToRedis()
+	userLogin := "tavaresdong"
+
+	uid := CreateUser(client, userLogin, "yucdong")
+	assert.NotEqual(t, "", uid)
+
+	postedMessage := "What a beautiful day today"
+	statusid, err := CreateStatus(client, uid, postedMessage)
+	assert.Nil(t, err)
+
+	data, err := FetchStatus(client, statusid)
+	assert.Nil(t, err)
+	assert.Equal(t, data["message"], postedMessage)
+}

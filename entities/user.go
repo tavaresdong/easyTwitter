@@ -106,7 +106,7 @@ func CreateUser(client *redis.Client, login string, name string) string {
 		"followers":0,
 		"following":0,
 		"posts":0,
-		"signup":time.Now(),
+		"signup":time.Now().UnixNano() / int64(time.Millisecond),
 	}
 
 	uid := strconv.FormatInt(id, 10)
