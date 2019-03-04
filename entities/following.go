@@ -36,8 +36,6 @@ func FollowUser(client *redis.Client, uid string, otherUid string) error {
 	_, err := pipe.Exec()
 	fmt.Println(followers.Val(), err)
 
-	pipe = client.Pipeline()
-
 	pipe.HSet(fmt.Sprintf("users:%s", uid), "following", following.Val())
 	pipe.HSet(fmt.Sprintf("users:%s", otherUid), "followers", followers.Val())
 	if len(statusAndSCores.Val()) > 0 {
@@ -74,7 +72,6 @@ func UnfollowUser(client *redis.Client, uid string, otherUid string) error {
 	for i := range statuses.Val() {
 		s[i] = statuses.Val()[i]
 	}
-	pipe = client.Pipeline()
 	pipe.HSet(fmt.Sprintf("users:%s", uid), "following", following.Val())
 	pipe.HSet(fmt.Sprintf("users:%s", otherUid), "followers", followers.Val())
 	if len(s) > 0 {
